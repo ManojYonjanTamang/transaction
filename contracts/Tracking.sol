@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0
+pragma solidity 0.8.0;
 
 contract Tracking {
 
@@ -9,24 +9,24 @@ contract Tracking {
     struct Shipment {
         address sender;
         address receiver;
-        unit256 pickupTime;
-        unit256 deliveryTime;
-        unit256 distance;
-        unit256 price;
+        uint256 pickupTime;
+        uint256 deliveryTime;
+        uint256 distance;
+        uint256 price;
         ShipmentStatus status;
         bool isPaid;
     }
 
     mapping(address => Shipment[]) public shipments;
-    unit256 public shipmentCount;
+    uint256 public shipmentCount;
 
     struct TypeShipment {
         address sender;
         address receiver;
-        unit256 pickupTime;
-        unit256 deliveryTime;
-        unit256 distance;
-        unit256 price;
+        uint256 pickupTime;
+        uint256 deliveryTime;
+        uint256 distance;
+        uint256 price;
         ShipmentStatus status;
         bool isPaid;
     }
@@ -39,17 +39,17 @@ contract Tracking {
         uint256 pickupTime,
         uint256 deliveryTime,
         uint256 distance,
-        uint256 price,
+        uint256 price
     );
     event ShipmentInTransit(
         address indexed sender,
         address indexed receiver,
-        uint256 pickupTime,
+        uint256 pickupTime
     );
     event ShipmentDelivered(
         address indexed sender,
         address indexed receiver,
-        uint256 deliveryTime,
+        uint256 deliveryTime
     );
     event ShipmentPaid(
         address indexed sender,
@@ -68,23 +68,42 @@ contract Tracking {
         uint256 _distance,
         uint256 _price
     ) public payable {
-        require(msg.value == _price, "Incorrect payment amount. Payment amount must match the price."););
-        Shipment memory shipment = Shipment({msg.sender, _receiver, _pickupTime, 0, _distance, _price, ShipmentStatus.PENDING, false});
+        require(msg.value == _price, "Incorrect payment amount. Payment amount must match the price.");
+        Shipment memory shipment = Shipment({
+            sender: msg.sender,
+            receiver: _receiver,
+            pickupTime: _pickupTime,
+            deliveryTime: 0,
+            distance: _distance,
+            price: _price,
+            status: ShipmentStatus.PENDING,
+            isPaid: false
+        });
         shipments[msg.sender].push(shipment);
         shipmentCount++;
-        typeShipments.push(TypeShipment({msg.sender, _receiver, _pickupTime, 0, _distance, _price, ShipmentStatus.PENDING, false}));
+        typeShipments.push(TypeShipment({
+            sender: msg.sender,
+            receiver: _receiver,
+            pickupTime: _pickupTime,
+            deliveryTime: 0,
+            distance: _distance,
+            price: _price,
+            status: ShipmentStatus.PENDING,
+            isPaid: false
+        }));
 
         emit ShipmentCreated(
             msg.sender, 
             _receiver, 
             _pickupTime, 
+            0,  // deliveryTime
             _distance, 
             _price
         );
     }
 
 
-    function startShipment (address _sender, address _receiver, unit256 _index) public {
+    function startShipment (address _sender, address _receiver, uint256 _index) public {
         Shipment storage shipment = shipments[_sender][_index];
         TypeShipment storage typeShipment = typeShipments[_index];
 
@@ -110,7 +129,7 @@ contract Tracking {
         typeShipment.status = ShipmentStatus.DELIVERED;
         typeShipment.deliveryTime = block.timestamp;
 
-        unit256 amount = shipment.price;
+        uint256 amount = shipment.price;
         payable(shipment.sender).transfer(amount);
         shipment.isPaid = true;
         typeShipment.isPaid = true;
