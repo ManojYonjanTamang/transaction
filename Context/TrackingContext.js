@@ -7,7 +7,7 @@ const ContractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const ContractABI = tracking.abi;
 
 const fetchContract = (signerOrProvider) => {
-  new ethers.Contract(ContractAddress, ContractABI, signerOrProvider);
+  return new ethers.Contract(ContractAddress, ContractABI, signerOrProvider);
 };
 
 export const TrackingContext = React.createContext();
@@ -30,8 +30,8 @@ export const TrackingProvider = ({ children }) => {
         receiver,
         new Date(pickupTime).getTime(),
         distance,
-        ethers.utils.parseUnits(price, 18),
-        { value: ethers.utils.parseUnits(price, 18) }
+        ethers.utils.parseUnits(price, "ether"),
+        ethers.utils.parseUnits(price, "ether")
       );
       await createItem.wait();
       console.log(createItem);
@@ -45,7 +45,7 @@ export const TrackingProvider = ({ children }) => {
       const provider = new ethers.providers.JsonRpcProvider();
       const contract = fetchContract(provider);
       const shipments = await contract.getAllTransactions();
-      const getAllShipments = shipments.map((shipment) => ({
+      const allShipments = shipments.map((shipment) => ({
         sender: shipment.sender,
         receiver: shipment.receiver,
         price: ethers.utils.formatEther(shipment.price.toString()),
@@ -55,7 +55,7 @@ export const TrackingProvider = ({ children }) => {
         isPaid: shipment.isPaid,
         status: shipment.status,
       }));
-      return getAllShipments;
+      return allShipments;
     } catch (error) {
       console.log("Error fetching shipments: ", error);
     }

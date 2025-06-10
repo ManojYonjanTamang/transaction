@@ -152,11 +152,11 @@ contract Tracking {
         );
     }
 
-    function getShipmentCount(address _sender) public view returns (uint256) {
+    function getShipmentsCount(address _sender) public view returns (uint256) {
         return shipments[_sender].length;
     }
-// function name
-    function getAllShipments() public view returns (TypeShipment[] memory) {
+
+    function getAllTransactions() public view returns (TypeShipment[] memory) {
         return typeShipments;
     }
 
